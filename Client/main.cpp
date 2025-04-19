@@ -1,5 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include "client.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +14,10 @@ int main(int argc, char *argv[])
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-    engine.loadFromModule("Client", "Chat");
+    engine.loadFromModule("Client", "Main");
+
+    Client client;
+    engine.rootContext()->setContextProperty("client", &client);
 
     return app.exec();
 }

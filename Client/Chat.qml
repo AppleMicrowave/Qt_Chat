@@ -2,18 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
 
-Window {
-
-    width: 1000
-    minimumWidth: 700
-
-    height: 500
-    minimumHeight: 400
-
-    visible: true
-    title: qsTr("Chat App")
-    id: window
-
+Page {
     Rectangle {
         anchors.fill: parent
         color: "Sky blue"
@@ -29,7 +18,7 @@ Window {
                 Layout.leftMargin: 30
                 Layout.bottomMargin: 20
 
-                Layout.minimumWidth: 150
+                Layout.minimumWidth: 100
                 Layout.maximumWidth: 300
 
                 Layout.fillWidth: true
@@ -62,8 +51,9 @@ Window {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    Text {
+                    TextArea {
                         id: content
+
                     }
                 }
 
@@ -76,6 +66,14 @@ Window {
                         id: input
                         Layout.fillWidth: true
                         Layout.preferredHeight: 60
+                        placeholderText: "Введите сообщение..."
+
+                        Keys.onReturnPressed: {
+                                if (!input.text.trim().isEmpty()) {
+                                    client.sendMessage(input.text)
+                                    input.text = ""
+                                }
+                            }
                     }
 
                     Button {

@@ -1,15 +1,23 @@
 #include "client.h"
 
-Client::Client()
+Client::Client(QObject *parent) : QObject(parent)
 {
+    qDebug() << "Client is alive";
     socket = new QTcpSocket(this);
+
+    connect(socket, &QTcpSocket::connected, this, []() {
+        qDebug() << "Connection established!";
+    });
+    connect(socket, &QTcpSocket::errorOccurred, this, []() { // TODO: forbid to sign if server is shut down
+        qDebug() << "Failed to connect!";
+    });
     connect(socket, &QTcpSocket::readyRead, this, &Client::readFromConnection);
     connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
 }
 
 void Client::on_button_authorize_clicked()
 {
-    socket->connectToHost("127.0.0.1", 8080);
+    socket->connectToHost(QHostAddress::LocalHost, 8080);
 }
 
 void Client::on_button_send_clicked(const QString& text)
@@ -23,12 +31,15 @@ void Client::readFromConnection()
     in.setVersion(QDataStream::Qt_6_9);
     if (in.status() == QDataStream::Ok)
     {
-        for(;;) {
-            if (nextBlockSize == 0) {
+        for(;;)
+        {
+            if (nextBlockSize == 0)
+            {
                 if (socket->bytesAvailable() < 2) break;
                 in >> nextBlockSize;
             }
             if (socket->bytesAvailable() < nextBlockSize) break;
+
             QString str;
             in >> str;
             nextBlockSize = 0;
@@ -47,4 +58,5 @@ void Client::sendToConnection(const QString& text)
     out.device()->seek(0);
     out << quint16(data.size() - sizeof(quint16));
     socket->write(data);
+    qDebug() << "Data sended!";
 }

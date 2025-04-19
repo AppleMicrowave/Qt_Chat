@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
+import QtQuick.Window 2.15
 
 ApplicationWindow {
     width: 1000
@@ -18,5 +19,14 @@ ApplicationWindow {
         anchors.fill: parent
 
         initialItem: Authorization {}
+
+        pushEnter: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 0
+                to:1
+                duration: 200
+            }
+        }
     }
 }

@@ -3,10 +3,10 @@
 
 Server::Server()
 {
-
-    if (this->listen(QHostAddress::Any, 8080))
+    if (this->listen(QHostAddress::LocalHost, 8080))
     {
         qDebug() << "start";
+        //qDebug() << this->serverAddress() << " " << this->serverPort();
     }
     else
     {
@@ -14,27 +14,45 @@ Server::Server()
     }
 }
 
-void Server::establish_connection(qintptr socketDescriptor)
+void Server::incomingConnection(qintptr socketDescriptor)
 {
     socket = new QTcpSocket;
     socket->setSocketDescriptor(socketDescriptor);
-    connect(socket, &QTcpSocket::readyRead, this, &Server::handle_connection);
-    connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
-
-    sockets.push_back(socket);
-    qDebug() << "client connected" << socketDescriptor;
+    addToSockets(socket);
+    qDebug() << "Client connected:" << socketDescriptor;
 }
 
-void Server::handle_connection()
+void Server::addToSockets(QTcpSocket *socket)
 {
+    if (socket == nullptr) qDebug() << "Socket is NULL";
+    sockets.push_back(socket);
+    connect(socket, &QTcpSocket::readyRead, this, &Server::handleConnection);
+    connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+}
+
+void Server::handleConnection()
+{
+    qDebug() << "Message recieved";
     socket = (QTcpSocket*)sender();
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_6_9);
     if (in.status() == QDataStream::Ok)
     {
-        QString str;
-        in >> str;
-        qDebug() << "Read: " << str;
+        for(;;)
+        {
+            if (nextBlockSize == 0)
+            {
+                if (socket->bytesAvailable() < 2) break;
+                in >> nextBlockSize;
+            }
+            if (socket->bytesAvailable() < nextBlockSize) break;
+
+            QString str;
+            in >> str;
+            nextBlockSize = 0;
+            replyConnection(str);
+            break;
+        }
     }
     else
     {
@@ -42,11 +60,17 @@ void Server::handle_connection()
     }
 }
 
-void Server::reply_connection(QString message)
+void Server::replyConnection(QString message)
 {
     data.clear();
     QDataStream out(&data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_9);
-    out << message;
-    socket->write(data);
+    out << quint16(0) << message;
+    out.device()->seek(0);
+    out << quint16(data.size() - sizeof(quint16));
+
+    for (int i = 0; i < sockets.size(); ++i)
+    {
+        sockets[i]->write(data);
+    }
 }

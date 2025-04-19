@@ -3,6 +3,9 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
 
 Page {
+    id: chat_page
+    //property Client client
+
     Rectangle {
         anchors.fill: parent
         color: "Sky blue"
@@ -69,11 +72,13 @@ Page {
                         placeholderText: "Введите сообщение..."
 
                         Keys.onReturnPressed: {
-                                if (!input.text.trim().isEmpty()) {
-                                    client.sendMessage(input.text)
-                                    input.text = ""
-                                }
+                            if (input.text !== "") {
+                                console.log("Send a message: " + input.text);
+                                client.on_button_send_clicked(input.text);
+                                input.clear();
                             }
+                            input.clear()
+                        }
                     }
 
                     Button {
@@ -81,6 +86,7 @@ Page {
                         Layout.alignment: Qt.AlignCenter
                         Layout.preferredWidth: 50
                         Layout.preferredHeight: 50
+                        text: "Load"
                     }
 
                     Button {
@@ -88,6 +94,15 @@ Page {
                         Layout.alignment: Qt.AlignCenter
                         Layout.preferredWidth: 50
                         Layout.preferredHeight: 50
+                        text: "Send"
+
+                        onClicked: {
+                            if (!input.text === "") {
+                                client.on_button_send_clicked(input.text)
+                                input.clear()
+                            }
+                            input.clear()
+                        }
                     }
                 }
             }

@@ -16,11 +16,10 @@ qt_add_executable(appClient
 qt_add_qml_module(appClient
     URI Client
     VERSION 1.0
-    QML_FILES
-    Chat.qml
     SOURCES client.h client.cpp
     QML_FILES Main.qml
     QML_FILES Authorization.qml
+    QML_FILES Chat.qml
 )
 
 target_link_libraries(appClient

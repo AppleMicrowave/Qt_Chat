@@ -7,16 +7,21 @@
 class Server : public QTcpServer
 {
     Q_OBJECT
-private:
-    QVector<QTcpSocket*> sockets;
-    QByteArray data;
-    void reply_connection(QString message);
+
 public:
     Server();
     QTcpSocket* socket;
-public slots:
-    void establish_connection(qintptr socketDescriptor);
-    void handle_connection();
+
+private:
+    QVector<QTcpSocket*> sockets;
+    QByteArray data;
+    quint16 nextBlockSize = 0;
+    void replyConnection(QString message);
+    void addToSockets(QTcpSocket* socket);
+
+private slots:
+    void incomingConnection(qintptr socketDescriptor);
+    void handleConnection();
 };
 
 #endif // SERVER_H

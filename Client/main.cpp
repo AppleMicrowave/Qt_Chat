@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 
     Client client;
     engine.rootContext()->setContextProperty("client", &client);
+    //qmlRegisterType<Client>("myClass", 1, 0,"Client");
 
     return app.exec();
 }

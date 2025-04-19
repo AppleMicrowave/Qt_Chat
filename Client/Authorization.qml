@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 
 Page {
     id: authorization_page
+    //property Client client
 
     Button {
         id: start
@@ -10,6 +11,9 @@ Page {
         height: 100
         text: "Press"
         anchors.centerIn: parent
-        onClicked: stackView.push("Chat.qml")
+        onClicked: {
+            client.on_button_authorize_clicked()
+            stackView.push("Chat.qml")
+        }
     }
 }

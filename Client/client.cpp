@@ -15,6 +15,11 @@ Client::Client(QObject *parent) : QObject(parent)
     connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
 }
 
+QStringList Client::getMessages() const
+{
+    return chatMessages;
+}
+
 void Client::on_button_authorize_clicked()
 {
     socket->connectToHost(QHostAddress::LocalHost, 8080);
@@ -25,38 +30,19 @@ void Client::on_button_send_clicked(const QString& text)
     sendToConnection(text);
 }
 
-void Client::readFromConnection()
+QString Client::readFromConnection()
 {
-    QDataStream in(socket);
-    in.setVersion(QDataStream::Qt_6_9);
-    if (in.status() == QDataStream::Ok)
-    {
-        for(;;)
-        {
-            if (nextBlockSize == 0)
-            {
-                if (socket->bytesAvailable() < 2) break;
-                in >> nextBlockSize;
-            }
-            if (socket->bytesAvailable() < nextBlockSize) break;
+    data.clear();
+    data = socket->readAll();
 
-            QString str;
-            in >> str;
-            nextBlockSize = 0;
-            sendToConnection(str);
-            break;
-        }
-    }
+    QString message = QString::fromUtf8(data);
+    chatMessages.append(message);
+
+    emit messageRecieved(message);
+    return message;
 }
 
 void Client::sendToConnection(const QString& text)
 {
-    data.clear();
-    QDataStream out(&data, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_9);
-    out << quint16(0) << text;
-    out.device()->seek(0);
-    out << quint16(data.size() - sizeof(quint16));
-    socket->write(data);
-    qDebug() << "Data sended!";
+    socket->write(text.toUtf8());
 }

@@ -4,7 +4,6 @@ import QtQuick.Layouts 2.15
 
 Page {
     id: chat_page
-    //property Client client
 
     Rectangle {
         anchors.fill: parent
@@ -56,7 +55,9 @@ Page {
 
                     TextArea {
                         id: content
-
+                        readOnly: true
+                        wrapMode: TextEdit.Wrap
+                        text: client.chatMessages.join("\n")
                     }
                 }
 
@@ -97,7 +98,7 @@ Page {
                         text: "Send"
 
                         onClicked: {
-                            if (!input.text === "") {
+                            if (input.text !== "") {
                                 client.on_button_send_clicked(input.text)
                                 input.clear()
                             }

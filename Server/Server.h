@@ -10,18 +10,17 @@ class Server : public QTcpServer
 
 public:
     Server();
-    QTcpSocket* socket;
 
 private:
     QVector<QTcpSocket*> sockets;
     QByteArray data;
     quint16 nextBlockSize = 0;
-    void replyConnection(QString message);
+    void sendToConnection(const QString& message);
     void addToSockets(QTcpSocket* socket);
 
 private slots:
     void incomingConnection(qintptr socketDescriptor);
-    void handleConnection();
+    void readFromConnection();
 };
 
 #endif // SERVER_H

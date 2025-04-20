@@ -28,6 +28,7 @@ void Server::addToSockets(QTcpSocket *socket)
     sockets.push_back(socket);
     connect(socket, &QTcpSocket::readyRead, this, &Server::readFromConnection);
     connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+    connect(socket, &QTcpSocket::disconnected, this, &Server::socketDisconnected);
 }
 
 void Server::readFromConnection()
@@ -38,6 +39,7 @@ void Server::readFromConnection()
 
     while(socket->bytesAvailable() > 0)
     {
+        quint16& nextBlockSize = socketBlockSizes[socket];
         if (nextBlockSize == 0) {
             if (socket->bytesAvailable() < sizeof(quint16)) { break; }
             in >> nextBlockSize;
@@ -52,6 +54,18 @@ void Server::readFromConnection()
 
         sendToConnection(message);
         nextBlockSize = 0;
+    }
+}
+
+void Server::socketDisconnected()
+{
+    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+    for (int i = 0; i < sockets.size(); ++i) {
+        if (sockets[i] == socket) {
+            sockets.removeAt(i);
+            socketBlockSizes.remove(socket);
+            break;
+        }
     }
 }
 

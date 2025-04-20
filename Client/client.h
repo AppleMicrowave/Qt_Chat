@@ -15,9 +15,11 @@ public:
 
 private:
     QTcpSocket* socket;
+
     QByteArray data;
-    quint16 nextBlockSize = 0;
     QStringList chatMessages;
+
+    quint16 nextBlockSize = 0;
 
     void sendToConnection(const QString& text);
     void addToSockets(QTcpSocket* socket);

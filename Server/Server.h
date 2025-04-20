@@ -14,13 +14,15 @@ public:
 private:
     QVector<QTcpSocket*> sockets;
     QByteArray data;
-    quint16 nextBlockSize = 0;
+    QMap<QTcpSocket*, quint16> socketBlockSizes;
+
     void sendToConnection(const QString& message);
     void addToSockets(QTcpSocket* socket);
 
 private slots:
     void incomingConnection(qintptr socketDescriptor);
     void readFromConnection();
+    void socketDisconnected();
 };
 
 #endif // SERVER_H

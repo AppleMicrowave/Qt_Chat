@@ -1,9 +1,13 @@
 #include "Server.h"
 #include <QDebug>
-#include <QThread>
 
 Server::Server()
 {
+    QFile dbFile("chat.db");
+    if (!dbFile.exists()) {
+        initializeDB();
+    }
+
     if (this->listen(QHostAddress::LocalHost, 8080))
     {
         qDebug() << "start";
@@ -86,3 +90,73 @@ void Server::sendToConnection(const QString& message)
         sockets[i]->flush();
     }
 }
+
+void Server::initializeDB()
+{
+    QString path = QCoreApplication::applicationDirPath() + "/chat.db";
+
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(path);
+
+    if (db.open() == false) {
+        //qDebug() << "Ошибка при открытии базы данных:" << db.lastError().text();
+        return;
+    }
+
+    QSqlQuery query;
+
+    if (!query.exec(
+            "CREATE TABLE IF NOT EXISTS users ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "login TEXT UNIQUE,"
+            "password TEXT)"
+            )) {
+        // qDebug() << "Ошибка создания таблицы users:" << query.lastError().text();
+    }
+
+    if (!query.exec(
+            "CREATE TABLE IF NOT EXISTS messages ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "sender TEXT,"
+            "receiver TEXT,"
+            "message TEXT,"
+            "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"
+            )) {
+        //qDebug() << "Ошибка создания таблицы messages:" << query.lastError().text();
+    }
+    db.close();
+}
+
+bool Server::authentication(const QString &login, const QString &password, bool register_flag)
+{
+    QSqlDatabase db = QSqlDatabase::database();
+    if (db.open() == false) {
+        qDebug() << "DB connect is failed";
+        return false;
+    }
+    QSqlQuery query;
+
+    if (!register_flag)
+    {
+        query.prepare("SELECT id FROM users WHERE login = :login AND password = :password");
+    }
+    else
+    {
+        query.prepare("INSERT INTO users (login, password) VALUES (:login, :password)");
+    }
+
+    query.bindValue(":login", login);
+    query.bindValue(":password", password);
+
+    if (query.exec()) // If query is accepted
+    {
+        if (!register_flag) // Get in only if LOGIN mode
+        {
+            if (query.next()) return true; // If user has been found
+        }
+        return true;
+    }
+    return false;
+}
+

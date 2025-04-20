@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS Network)
+find_package(Qt6 REQUIRED COMPONENTS Sql)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -23,7 +24,7 @@ qt_add_qml_module(appClient
 )
 
 target_link_libraries(appClient
-    PRIVATE Qt6::Quick Qt6::Network
+    PRIVATE Qt6::Quick Qt6::Network Qt6::Sql
 )
 
 include(GNUInstallDirs)

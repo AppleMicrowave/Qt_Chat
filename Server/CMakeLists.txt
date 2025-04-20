@@ -12,15 +12,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Network)
-
+find_package(Qt6 REQUIRED COMPONENTS Sql)
 
 add_executable(Server
   main.cpp
   Server.h Server.cpp
 )
-target_link_libraries(
-  Server Qt6::Core
-  Qt6::Network
+target_link_libraries(Server
+  PRIVATE Qt6::Core Qt6::Network Qt6::Sql
 )
 
 include(GNUInstallDirs)

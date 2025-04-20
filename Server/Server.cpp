@@ -1,5 +1,6 @@
 #include "Server.h"
 #include <QDebug>
+#include <QThread>
 
 Server::Server()
 {
@@ -82,5 +83,6 @@ void Server::sendToConnection(const QString& message)
     for (int i = 0; i < sockets.size(); ++i)
     {
         sockets[i]->write(data);
+        sockets[i]->flush();
     }
 }

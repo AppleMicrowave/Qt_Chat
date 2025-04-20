@@ -23,6 +23,11 @@ QStringList Client::getMessages() const
 void Client::on_button_authorize_clicked()
 {
     socket->connectToHost(QHostAddress::LocalHost, 8080);
+    if (socket->waitForConnected(3000) == false)
+    {
+        qDebug() << "Connection failed!";
+        return;
+    }
 }
 
 void Client::on_button_send_clicked(const QString& text)

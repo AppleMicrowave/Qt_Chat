@@ -32,17 +32,41 @@ void Client::on_button_send_clicked(const QString& text)
 
 QString Client::readFromConnection()
 {
-    data.clear();
-    data = socket->readAll();
+    QDataStream in(socket);
+    in.setVersion(QDataStream::Qt_6_9);
 
-    QString message = QString::fromUtf8(data);
-    chatMessages.append(message);
+    QString temp;
+    while(socket->bytesAvailable() > 0)
+    {
+        if (nextBlockSize == 0) {
+            if (socket->bytesAvailable() < sizeof(quint16)) break;
+            in >> nextBlockSize;
+        }
 
-    emit messageRecieved(message);
-    return message;
+        if (socket->bytesAvailable() < nextBlockSize) break;
+
+        QString message;
+        in >> message;
+        temp = message;
+
+        chatMessages.append(message);
+
+        qDebug() << "Echo reply: " << message;
+        nextBlockSize = 0;
+
+        emit messageRecieved(message);
+    }
+    return temp;
 }
 
 void Client::sendToConnection(const QString& text)
 {
-    socket->write(text.toUtf8());
+    QDataStream out(&data, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_9);
+    out << quint16(0);
+    out << text;
+    out.device()->seek(0);
+    out << quint16(data.size() - sizeof(quint16));
+
+    socket->write(data);
 }

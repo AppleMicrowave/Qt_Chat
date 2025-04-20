@@ -5,6 +5,15 @@ import QtQuick.Layouts 2.15
 Page {
     id: chat_page
 
+    function send() {
+        if (input.text !== "") {
+            client.on_button_send_clicked(input.text)
+            console.log("Send message: " + input.text);
+            input.clear();
+        }
+        input.clear();
+    }
+
     Rectangle {
         anchors.fill: parent
         color: "Sky blue"
@@ -73,12 +82,7 @@ Page {
                         placeholderText: "Введите сообщение..."
 
                         Keys.onReturnPressed: {
-                            if (input.text !== "") {
-                                console.log("Send a message: " + input.text);
-                                client.on_button_send_clicked(input.text);
-                                input.clear();
-                            }
-                            input.clear()
+                            send()
                         }
                     }
 
@@ -98,11 +102,7 @@ Page {
                         text: "Send"
 
                         onClicked: {
-                            if (input.text !== "") {
-                                client.on_button_send_clicked(input.text)
-                                input.clear()
-                            }
-                            input.clear()
+                            send()
                         }
                     }
                 }

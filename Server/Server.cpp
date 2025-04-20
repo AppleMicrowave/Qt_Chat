@@ -33,16 +33,40 @@ void Server::addToSockets(QTcpSocket *socket)
 void Server::readFromConnection()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
-    data = socket->readAll();
-    QString message = QString::fromUtf8(data);
-    qDebug() << "Message received: " << message;
-    sendToConnection(message);
+    QDataStream in(socket);
+    in.setVersion(QDataStream::Qt_6_9);
+
+    while(socket->bytesAvailable() > 0)
+    {
+        if (nextBlockSize == 0) {
+            if (socket->bytesAvailable() < sizeof(quint16)) { break; }
+            in >> nextBlockSize;
+        }
+
+        if (socket->bytesAvailable() < nextBlockSize) { break; }
+
+        QString message;
+        in >> message;
+
+        qDebug() << "Message received: " << message;
+
+        sendToConnection(message);
+        nextBlockSize = 0;
+    }
 }
 
 void Server::sendToConnection(const QString& message)
 {
+    data.clear();
+    QDataStream out(&data, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_9);
+    out << quint16(0);
+    out << message;
+    out.device()->seek(0);
+    out << quint16(data.size() - sizeof(quint16));
+
     for (int i = 0; i < sockets.size(); ++i)
     {
-        sockets[i]->write(message.toUtf8());
+        sockets[i]->write(data);
     }
 }

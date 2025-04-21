@@ -3,10 +3,10 @@
 
 Server::Server()
 {
-    QFile dbFile("chat.db");
-    if (!dbFile.exists()) {
-        initializeDB();
-    }
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("chat.db");
+
+    initializeDB();
 
     if (this->listen(QHostAddress::LocalHost, 8080))
     {
@@ -45,7 +45,8 @@ void Server::readFromConnection()
     while(socket->bytesAvailable() > 0)
     {
         quint16& nextBlockSize = socketBlockSizes[socket];
-        if (nextBlockSize == 0) {
+        if (nextBlockSize == 0)
+        {
             if (socket->bytesAvailable() < sizeof(quint16)) { break; }
             in >> nextBlockSize;
         }
@@ -54,11 +55,38 @@ void Server::readFromConnection()
 
         QString message;
         in >> message;
-
-        qDebug() << "Message received: " << message;
-
-        sendToConnection(message);
         nextBlockSize = 0;
+
+        QStringList parts = message.split("|");
+        QString command = parts[0];
+
+        if (command == "MSG" && parts.size() > 1)
+        {
+            message = parts[1];
+            sendToConnection(message);
+        }
+        else if (command == "AUTH" && parts.size() == 3)
+        {
+            QString username = parts[1];
+            QString password = parts[2];
+
+            QString response = authentication(username, password, 0) ? "AUTH_OK" : "AUTH_FAIL";
+            qDebug() << response;
+            sendToConnection(response);
+        }
+        else if (command == "REG" && parts.size() == 3)
+        {
+            QString username = parts[1];
+            QString password = parts[2];
+
+            QString response = authentication(username, password, 1) ? "REG_OK" : "REG_FAIL";
+            qDebug() << response;
+            sendToConnection(response);
+        }
+
+        else {
+            sendToConnection("ERROR|Unknown command or invalid arguments");
+        }
     }
 }
 
@@ -93,18 +121,14 @@ void Server::sendToConnection(const QString& message)
 
 void Server::initializeDB()
 {
-    QString path = QCoreApplication::applicationDirPath() + "/chat.db";
-
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(path);
+    QSqlDatabase db = QSqlDatabase::database();
 
     if (db.open() == false) {
-        //qDebug() << "Ошибка при открытии базы данных:" << db.lastError().text();
+        qDebug() << "Cannot open db";
         return;
     }
 
-    QSqlQuery query;
+    QSqlQuery query(db);
 
     if (!query.exec(
             "CREATE TABLE IF NOT EXISTS users ("
@@ -112,7 +136,6 @@ void Server::initializeDB()
             "login TEXT UNIQUE,"
             "password TEXT)"
             )) {
-        // qDebug() << "Ошибка создания таблицы users:" << query.lastError().text();
     }
 
     if (!query.exec(
@@ -123,7 +146,6 @@ void Server::initializeDB()
             "message TEXT,"
             "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"
             )) {
-        //qDebug() << "Ошибка создания таблицы messages:" << query.lastError().text();
     }
     db.close();
 }
@@ -131,32 +153,35 @@ void Server::initializeDB()
 bool Server::authentication(const QString &login, const QString &password, bool register_flag)
 {
     QSqlDatabase db = QSqlDatabase::database();
+    qDebug() << db.databaseName();
     if (db.open() == false) {
         qDebug() << "DB connect is failed";
         return false;
     }
-    QSqlQuery query;
+    QSqlQuery query(db);
 
     if (!register_flag)
     {
         query.prepare("SELECT id FROM users WHERE login = :login AND password = :password");
+        query.bindValue(":login", login);
+        query.bindValue(":password", password);
+
+        if (query.exec() && query.next()) {
+            return true;
+        }
+        return false;
     }
     else
     {
         query.prepare("INSERT INTO users (login, password) VALUES (:login, :password)");
-    }
+        query.bindValue(":login", login);
+        query.bindValue(":password", password);
 
-    query.bindValue(":login", login);
-    query.bindValue(":password", password);
-
-    if (query.exec()) // If query is accepted
-    {
-        if (!register_flag) // Get in only if LOGIN mode
-        {
-            if (query.next()) return true; // If user has been found
+        if (!query.exec()) {
+            qDebug() << "Registration error:" << query.lastError().text();
+            return false;
         }
         return true;
     }
-    return false;
 }
 

@@ -21,6 +21,7 @@ qt_add_qml_module(appClient
     QML_FILES Main.qml
     QML_FILES Authorization.qml
     QML_FILES Chat.qml
+    QML_FILES Start.qml
 )
 
 target_link_libraries(appClient

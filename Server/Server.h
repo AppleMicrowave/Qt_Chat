@@ -26,6 +26,8 @@ private:
 
     void initializeDB();
 
+    bool authentication(const QString& login, const QString& password, bool register_flag);
+
 private slots:
     void incomingConnection(qintptr socketDescriptor);
     void readFromConnection();

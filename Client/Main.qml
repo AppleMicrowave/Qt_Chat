@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 2.15
 import QtQuick.Window 2.15
 
 ApplicationWindow {
@@ -18,7 +17,9 @@ ApplicationWindow {
         id: stackView
         anchors.fill: parent
 
-        initialItem: Authorization {}
+        initialItem: Start {
+            pageStack: stackView
+        }
 
         pushEnter: Transition {
             PropertyAnimation {

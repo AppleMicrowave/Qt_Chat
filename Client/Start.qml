@@ -3,8 +3,6 @@ import QtQuick.Controls 2.15
 
 Page {
 
-    readonly property alias pageStack: stackView
-
     Button {
         id: start
         width: 100

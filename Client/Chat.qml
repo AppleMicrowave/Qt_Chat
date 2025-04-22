@@ -4,8 +4,6 @@ import QtQuick.Layouts 2.15
 
 Page {
 
-    readonly property alias pageStack: stackView
-
     id: chat_page
 
     function send() {
@@ -69,7 +67,7 @@ Page {
                         id: content
                         readOnly: true
                         wrapMode: TextEdit.Wrap
-                        text: client.getMessages().join("\n")
+                        text: client.chatMessages.join("\n")
                     }
                 }
 

@@ -73,7 +73,8 @@ QString Client::readFromConnection()
         else
         {
             chatMessages.append(message);
-            emit messageRecieved(message);
+            qDebug() << "Echo reply: " + message;
+            emit messageReceived(message);
         }
         nextBlockSize = 0;
     }

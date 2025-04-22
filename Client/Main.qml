@@ -13,13 +13,11 @@ ApplicationWindow {
     title: qsTr("Chat App")
     id: window
 
+    property alias pageStack: stackView
+
     StackView {
         id: stackView
         anchors.fill: parent
-
-        initialItem: Start {
-            pageStack: stackView
-        }
 
         pushEnter: Transition {
             PropertyAnimation {
@@ -30,4 +28,5 @@ ApplicationWindow {
             }
         }
     }
+    Component.onCompleted: pageStack.push("Start.qml")
 }

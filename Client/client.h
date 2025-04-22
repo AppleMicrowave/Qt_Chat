@@ -7,7 +7,7 @@
 class Client : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QStringList chatMessages READ getMessages() NOTIFY messageRecieved)
+    Q_PROPERTY(QStringList chatMessages READ getMessages() NOTIFY messageReceived)
 
 public:
     explicit Client(QObject* parent = nullptr);
@@ -27,7 +27,8 @@ private:
     void addToSockets(QTcpSocket* socket);
 
 signals:
-    void messageRecieved(const QString& message);
+    void messageReceived(const QString& message);
+    void messagesChanged();
     void authResult(const QString& result);
 
 public slots:

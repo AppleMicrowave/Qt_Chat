@@ -18,6 +18,8 @@ public:
 
 private:
     QVector<QTcpSocket*> sockets;
+    QTcpSocket* currentClient;
+
     QByteArray data;
     QMap<QTcpSocket*, quint16> socketBlockSizes;
 

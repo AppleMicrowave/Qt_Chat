@@ -1,11 +1,9 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
-import QtQuick.Dialogs 6.3
+import QtQuick.Dialogs
 
 Page {
-
-    readonly property alias pageStack: stackView
 
     id: authorization_page
 
@@ -18,11 +16,6 @@ Page {
         title: "Notification"
 
         text: ""
-        onAccepted: {
-            if (authorization_page.currentDialogContext === "Login succeed.") {
-                root.stackView.push("Chat.qml")
-            }
-        }
     }
     MessageDialog {
         id: regDialog
@@ -35,6 +28,7 @@ Page {
             loginDialog.title = "Login succeed.";
             loginDialog.text = "Welcome, " + client.getClientName();
             loginDialog.open();
+            pageStack.push("Chat.qml")
         } else if (result === "AUTH_FAIL") {
             loginDialog.title = "Login error.";
             loginDialog.text = "Invalid login/password / server is not avaliable.";

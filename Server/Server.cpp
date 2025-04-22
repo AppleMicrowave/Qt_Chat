@@ -63,6 +63,7 @@ void Server::readFromConnection()
         if (command == "MSG" && parts.size() > 1)
         {
             message = parts[1];
+            qDebug() << "Client's message: " + message;
             sendToConnection(message);
         }
         else if (command == "AUTH" && parts.size() == 3)
@@ -153,7 +154,6 @@ void Server::initializeDB()
 bool Server::authentication(const QString &login, const QString &password, bool register_flag)
 {
     QSqlDatabase db = QSqlDatabase::database();
-    qDebug() << db.databaseName();
     if (db.open() == false) {
         qDebug() << "DB connect is failed";
         return false;

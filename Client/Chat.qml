@@ -10,7 +10,7 @@ Page {
     function send() {
         if (input.text !== "") {
             client.on_button_send_clicked(input.text)
-            console.log("Send message: " + input.text);
+            //console.log("Send message: " + input.text);
             input.clear();
         }
         input.clear();

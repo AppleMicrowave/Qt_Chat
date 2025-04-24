@@ -32,6 +32,7 @@ void Client::on_button_authorize_clicked(const QString& login, const QString& pa
 
     QString mode = (register_flag == false) ? "AUTH" : "REG";
     QString auth_request = QString(mode + "|%1|%2").arg(login, password);
+    clientName = login;
     sendToConnection(auth_request);
 }
 
@@ -115,13 +116,21 @@ void Client::clientDisconnect()
 
 void Client::sendToConnection(const QString& text)
 {
+    QString result = text;
+    if (currentChat != "General")
+    {
+        QString content = (text.split("|"))[1];
+        result = QString("MSG|%1|%2|%3").arg(clientName, currentChat, content);
+        qDebug() << "Private message struct: " << result;
+    }
     data.clear();
     QDataStream out(&data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_9);
     out << quint16(0);
-    out << text;
+    out << result;
     out.device()->seek(0);
     out << quint16(data.size() - sizeof(quint16));
 
+    qDebug() << "Send message: " << result;
     socket->write(data);
 }

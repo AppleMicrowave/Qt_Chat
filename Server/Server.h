@@ -15,17 +15,19 @@ class Server : public QTcpServer
 
 public:
     Server();
+    void readFromConnection();
 
 private:
     QVector<QTcpSocket*> sockets;
     QTcpSocket* currentClient;
     QMap<QTcpSocket*, QString> clients;
+    QMap<QString, QStringList> chatList;
 
     QByteArray data;
     QMap<QTcpSocket*, quint16> socketBlockSizes;
 
-    void sendToConnection(const QString& message);
-    void sendToConnection(QTcpSocket* socket, const QString& message);
+    void sendToConnection(const QString& message); // Broadcast send
+    void sendToConnection(QTcpSocket* socket, const QString& message); // Private send
     void addToSockets(QTcpSocket* socket);
 
     void initializeDB();
@@ -34,7 +36,6 @@ private:
 
 private slots:
     void incomingConnection(qintptr socketDescriptor);
-    void readFromConnection();
     void socketDisconnected();
 };
 

@@ -15,8 +15,6 @@ public:
 
     Q_INVOKABLE void on_button_authorize_clicked(const QString& login, const QString& password, bool register_flag);
     Q_INVOKABLE void on_button_send_clicked(const QString& text) {sendToConnection("MSG|" + text);}
-    Q_INVOKABLE QStringList getMessages() const {return chatList[currentChat];}
-    Q_INVOKABLE QStringList getList() const {return chatList.keys();}
     Q_INVOKABLE QString getClientName() {return clientName;}
     Q_INVOKABLE void selectChat(const QString& chatName);
 
@@ -37,7 +35,7 @@ private:
     bool isConnected = false;
 
     void sendToConnection(const QString& text);
-    void addToSockets(QTcpSocket* socket);
+    //void addToSockets(QTcpSocket* socket);
 
 signals:
     void messageReceived(const QString& message);
@@ -51,6 +49,9 @@ public slots:
 
     Q_INVOKABLE bool authenticationReply(const QString& auth_result);
     Q_INVOKABLE void clientDisconnect();
+
+    Q_INVOKABLE QStringList getMessages() const {return chatList[currentChat];}
+    Q_INVOKABLE QStringList getList() const {return chatList.keys();}
 };
 
 #endif // CLIENT_H

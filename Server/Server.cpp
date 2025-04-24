@@ -62,9 +62,23 @@ void Server::readFromConnection()
 
         if (command == "MSG" && parts.size() > 1)
         {
-            message = parts[1];
             qDebug() << "Client's message: " + message;
-            sendToConnection(message);
+            if (parts.size() == 2) // Broadcast
+            {
+                message = parts[1];
+                sendToConnection(message);
+            }
+            else if (parts.size() == 4) // Private
+            {
+                message = parts[3];
+                QString receiver = parts[2];
+                for (QTcpSocket* clientSocket : clients.keys()) {
+                    if (clients.value(clientSocket) == receiver) {
+                        sendToConnection(clientSocket, message);
+                        break;
+                    }
+                }
+            }
         }
         else if (command == "LIST")
         {

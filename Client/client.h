@@ -8,15 +8,17 @@ class Client : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QStringList chats READ getList NOTIFY chatsChanged)
+    Q_PROPERTY(QStringList chatMessages READ getMessages NOTIFY messagesChanged)
 
 public:
     explicit Client(QObject* parent = nullptr);
 
     Q_INVOKABLE void on_button_authorize_clicked(const QString& login, const QString& password, bool register_flag);
     Q_INVOKABLE void on_button_send_clicked(const QString& text) {sendToConnection("MSG|" + text);}
-    Q_INVOKABLE QStringList getMessages(const QString& user) const {return chatList[user];}
-    Q_INVOKABLE QStringList getList() const {qDebug() << "Keys:" << chatList.keys();return chatList.keys();}
+    Q_INVOKABLE QStringList getMessages() const {return chatList[currentChat];}
+    Q_INVOKABLE QStringList getList() const {return chatList.keys();}
     Q_INVOKABLE QString getClientName() {return clientName;}
+    Q_INVOKABLE void selectChat(const QString& chatName);
 
     void requestClients() {sendToConnection("LIST");}
 

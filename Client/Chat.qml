@@ -71,7 +71,8 @@ Page {
                                 hoverEnabled: true
                                 onPressed: {
                                     background.color = "SkyBlue"
-                                    //client.selectChat(modelData)
+                                    client.selectChat(modelData)
+                                    console.log(modelData)
                                 }
                                 onReleased: background.color = "#85ffee"
                                 onEntered: background.border.width = 2;
@@ -96,8 +97,7 @@ Page {
                     TextArea {
                         id: content
                         readOnly: true
-                        wrapMode: TextEdit.Wrap
-                        text: client !== null && client.chatMessages !== undefined ? client.chatMessages.join("\n") : ""
+                        text: client !== null ? client.chatMessages.join("\n") : ""
                     }
                 }
 
@@ -110,6 +110,7 @@ Page {
                         id: input
                         Layout.fillWidth: true
                         Layout.preferredHeight: 60
+                        wrapMode: Wrap
                         placeholderText: "Введите сообщение..."
 
                         Keys.onReturnPressed: {

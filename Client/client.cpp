@@ -35,6 +35,15 @@ void Client::on_button_authorize_clicked(const QString& login, const QString& pa
     sendToConnection(auth_request);
 }
 
+void Client::selectChat(const QString& chatName)
+{
+    if (chatList.contains(chatName))
+    {
+        currentChat = chatName;
+        emit messagesChanged();
+    }
+}
+
 QString Client::readFromConnection()
 {
     QDataStream in(socket);
@@ -62,7 +71,6 @@ QString Client::readFromConnection()
         else if (message.startsWith("CLIENTS"))
         {
             chats = message.mid(8).split(",", Qt::SkipEmptyParts);
-            qDebug() << "Received list: " << chats;
             foreach (const QString& chatName, chats)
             {
                 if (!chatList.contains(chatName)) {
@@ -74,9 +82,9 @@ QString Client::readFromConnection()
         }
         else
         {
-            chatMessages.append(message);
-            qDebug() << "Echo reply: " + message;
-            emit messageReceived(message);
+            chatList[currentChat].append(message);
+            chatMessages = chatList.value(currentChat);
+            emit messagesChanged();
         }
         nextBlockSize = 0;
     }

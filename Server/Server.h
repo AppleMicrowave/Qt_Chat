@@ -19,11 +19,13 @@ public:
 private:
     QVector<QTcpSocket*> sockets;
     QTcpSocket* currentClient;
+    QMap<QTcpSocket*, QString> clients;
 
     QByteArray data;
     QMap<QTcpSocket*, quint16> socketBlockSizes;
 
     void sendToConnection(const QString& message);
+    void sendToConnection(QTcpSocket* socket, const QString& message);
     void addToSockets(QTcpSocket* socket);
 
     void initializeDB();

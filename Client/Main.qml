@@ -29,4 +29,7 @@ ApplicationWindow {
         }
     }
     Component.onCompleted: pageStack.push("Start.qml")
+    onClosing: {
+        client.clientDisconnect();
+    }
 }

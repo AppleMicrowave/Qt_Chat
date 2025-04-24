@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
+import QtQml.Models
 
 Page {
 
@@ -24,8 +25,7 @@ Page {
             anchors.fill: parent
             spacing: 20
 
-            Rectangle { // Chats list
-                id: chats
+            Rectangle { // Chats list  
                 Layout.topMargin: 20
                 Layout.leftMargin: 30
                 Layout.bottomMargin: 20
@@ -37,15 +37,45 @@ Page {
                 Layout.fillHeight: true
 
 
-                ScrollView {
-                    width: parent.width
-                    height: parent.height
-                    Column {
-                        Repeater {
-                            model: 50
-                            Label {
-                                text: "Chat"
-                                font.pixelSize: 30
+                ListView {
+                    id: chatList
+                    anchors.fill: parent
+                    Layout.margins: 5
+                    model: client !== null && client.chats !== undefined ? client.chats : []
+                    clip: true
+
+                    delegate: Item {
+                        width: chatList.width
+                        height: 60
+
+                        Rectangle {
+                            id: background
+                            anchors.fill: parent
+                            radius: 15
+                            color: "#85ffee"
+                            border.color: "Black"
+                            border.width: 1
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.leftMargin: 16
+                                text: modelData
+                                font.pixelSize: 18
+                                color: "#263238"
+                            }
+
+                            MouseArea {
+                                id: mouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onPressed: {
+                                    background.color = "SkyBlue"
+                                    //client.selectChat(modelData)
+                                }
+                                onReleased: background.color = "#85ffee"
+                                onEntered: background.border.width = 2;
+                                onExited: background.border.width = 1;
                             }
                         }
                     }
@@ -67,7 +97,7 @@ Page {
                         id: content
                         readOnly: true
                         wrapMode: TextEdit.Wrap
-                        text: client.chatMessages.join("\n")
+                        text: client !== null && client.chatMessages !== undefined ? client.chatMessages.join("\n") : ""
                     }
                 }
 

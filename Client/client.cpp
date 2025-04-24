@@ -15,11 +15,6 @@ Client::Client(QObject *parent) : QObject(parent)
     connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
 }
 
-QStringList Client::getMessages() const
-{
-    return chatMessages;
-}
-
 void Client::on_button_authorize_clicked(const QString& login, const QString& password, bool register_flag)
 {
     if (isConnected == false)
@@ -38,12 +33,6 @@ void Client::on_button_authorize_clicked(const QString& login, const QString& pa
     QString mode = (register_flag == false) ? "AUTH" : "REG";
     QString auth_request = QString(mode + "|%1|%2").arg(login, password);
     sendToConnection(auth_request);
-}
-
-void Client::on_button_send_clicked(const QString& text)
-{
-    QString message = "MSG|" + text;
-    sendToConnection(message);
 }
 
 QString Client::readFromConnection()
@@ -70,6 +59,19 @@ QString Client::readFromConnection()
         {
             authenticationReply(message);
         }
+        else if (message.startsWith("CLIENTS"))
+        {
+            chats = message.mid(8).split(",", Qt::SkipEmptyParts);
+            qDebug() << "Received list: " << chats;
+            foreach (const QString& chatName, chats)
+            {
+                if (!chatList.contains(chatName)) {
+                    chatList[chatName] = QStringList();
+                }
+            }
+
+            emit chatsChanged();
+        }
         else
         {
             chatMessages.append(message);
@@ -87,13 +89,20 @@ bool Client::authenticationReply(const QString& auth_result)
 
     bool status = false;
 
-    if (auth_result == "AUTH_OK" || auth_result == "REG_OK") status = true;
+    if (auth_result == "AUTH_OK" || auth_result == "REG_OK")
+    {
+        status = true;
+        requestClients();
+    }
     return status;
 }
 
-QString Client::getClientName()
+void Client::clientDisconnect()
 {
-    return clientName;
+    if (socket->state() == QTcpSocket::ConnectedState)
+    {
+        socket->disconnectFromHost();
+    }
 }
 
 void Client::sendToConnection(const QString& text)

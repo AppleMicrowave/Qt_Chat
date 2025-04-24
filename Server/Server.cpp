@@ -66,14 +66,29 @@ void Server::readFromConnection()
             qDebug() << "Client's message: " + message;
             sendToConnection(message);
         }
+        else if (command == "LIST")
+        {
+            for (QTcpSocket* clientSocket : clients.keys()) {
+                QStringList names = clients.values();
+                QString currentName = clients.value(clientSocket);
+                names.removeAll(currentName);
+
+                QString response = "CLIENTS|General," + names.join(",");
+                qDebug() << response;
+                sendToConnection(clientSocket, response);
+            }
+        }
         else if (command == "AUTH" && parts.size() == 3)
         {
             QString username = parts[1];
             QString password = parts[2];
 
             QString response = authentication(username, password, 0) ? "AUTH_OK" : "AUTH_FAIL";
-            qDebug() << response;
-            sendToConnection(response);
+            if (response == "AUTH_OK")
+            {
+                clients[socket] = username;
+            }
+            sendToConnection(socket, response);
         }
         else if (command == "REG" && parts.size() == 3)
         {
@@ -81,8 +96,11 @@ void Server::readFromConnection()
             QString password = parts[2];
 
             QString response = authentication(username, password, 1) ? "REG_OK" : "REG_FAIL";
-            qDebug() << response;
-            sendToConnection(response);
+            if (response == "REG_OK")
+            {
+                clients[socket] = username;
+            }
+            sendToConnection(socket, response);
         }
 
         else {
@@ -94,13 +112,9 @@ void Server::readFromConnection()
 void Server::socketDisconnected()
 {
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
-    for (int i = 0; i < sockets.size(); ++i) {
-        if (sockets[i] == socket) {
-            sockets.removeAt(i);
-            socketBlockSizes.remove(socket);
-            break;
-        }
-    }
+    sockets.removeOne(socket);
+    socketBlockSizes.remove(socket);
+    clients.remove(socket);
 }
 
 void Server::sendToConnection(const QString& message)
@@ -120,9 +134,24 @@ void Server::sendToConnection(const QString& message)
     }
 }
 
+void Server::sendToConnection(QTcpSocket *socket, const QString &message)
+{
+    data.clear();
+    QDataStream out(&data, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_9);
+    out << quint16(0);
+    out << message;
+    out.device()->seek(0);
+    out << quint16(data.size() - sizeof(quint16));
+
+    socket->write(data);
+    socket->flush();
+}
+
 void Server::initializeDB()
 {
     QSqlDatabase db = QSqlDatabase::database();
+    qDebug() << "Connected to database";
 
     if (db.open() == false) {
         qDebug() << "Cannot open db";

@@ -84,12 +84,23 @@ QString Client::readFromConnection()
         else
         {
             QStringList parts = message.split("|");
-            if (parts.size() == 2)
-            {
-                QString sender = parts[0];
-                QString content = parts[1];
+            QString sender = parts[1];
+            QString content = parts[2];
+            QString name = (sender == clientName) ? "You" : sender;
 
-                QString name = (sender == clientName) ? "You" : sender;
+            if (parts[0] == "BROADCAST")
+            {
+                content = QString("<b>%1: </b>\t%2").arg(name, content);
+                chatList["General"].append(content);
+
+                if (currentChat == "General")
+                {
+                    chatMessages = chatList.value("General");
+                    emit messagesChanged();
+                }
+            }
+            else if (parts[0] == "PRIVATE")
+            {
                 content = QString("<b>%1: </b>\t%2").arg(name, content);
                 chatList[sender].append(content);
 
@@ -99,20 +110,6 @@ QString Client::readFromConnection()
                     emit messagesChanged();
                 }
             }
-            else
-            {
-                chatList["General"].append(message);
-
-                if (currentChat == "General")
-                {
-                    chatMessages = chatList.value("General");
-                    emit messagesChanged();
-                }
-            }
-
-            // chatList[currentChat].append(message);
-            // chatMessages = chatList.value(currentChat);
-            // emit messagesChanged();
         }
         nextBlockSize = 0;
     }
@@ -146,9 +143,9 @@ void Client::sendToConnection(const QString& text)
     QString result = text;
     if (currentChat != "General")
     {
-        QString content = (text.split("|"))[1];
+        QString content = (text.split("|"))[2];
         result = QString("MSG|%1|%2|%3").arg(clientName, currentChat, content);
-        //qDebug() << "Private message struct: " << result;
+        qDebug() << "Private message: " << result;
 
         content = QString("<b>You:</b>\t%1").arg(content);
         chatList[currentChat].append(content);

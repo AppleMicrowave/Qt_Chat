@@ -14,7 +14,7 @@ public:
     explicit Client(QObject* parent = nullptr);
 
     Q_INVOKABLE void on_button_authorize_clicked(const QString& login, const QString& password, bool register_flag);
-    Q_INVOKABLE void on_button_send_clicked(const QString& text) {sendToConnection("MSG|" + text);}
+    Q_INVOKABLE void on_button_send_clicked(const QString& text) {sendToConnection("MSG|" + clientName + "|" + text);}
     Q_INVOKABLE QString getClientName() {return clientName;}
     Q_INVOKABLE void selectChat(const QString& chatName);
 

@@ -60,22 +60,26 @@ void Server::readFromConnection()
         QStringList parts = message.split("|");
         QString command = parts[0];
 
-        if (command == "MSG" && parts.size() > 1)
+        if (command == "MSG")
         {
             qDebug() << "Client's message: " + message;
-            if (parts.size() == 2) // Broadcast
+            if (parts.size() == 3) // Broadcast
             {
-                QString text = parts[1];
+                QString sender = parts[1];
+                QString text = parts[2];
+                text = QString("BROADCAST|%1|%2").arg(sender, text);
+
                 chatList["General"].append(text);
                 sendToConnection(text);
             }
             else if (parts.size() == 4) // Private
             {
+                // PRIVATE , FROM, TO, TEXT
                 QString sender = parts[1];
                 QString receiver = parts[2];
                 QString text = parts[3];
 
-                text = sender + "|" + text;
+                text = QString("PRIVATE|%1|%2").arg(sender, text);
 
                 foreach (currentClient, clients.keys())
                 {

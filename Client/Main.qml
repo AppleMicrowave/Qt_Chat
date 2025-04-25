@@ -14,6 +14,7 @@ ApplicationWindow {
     id: window
 
     property alias pageStack: stackView
+    property alias winTitle: window.title
 
     StackView {
         id: stackView

@@ -41,6 +41,7 @@ void Client::selectChat(const QString& chatName)
     if (chatList.contains(chatName))
     {
         currentChat = chatName;
+        qDebug() << "Selected chat: " << currentChat;
         emit messagesChanged();
     }
 }
@@ -78,14 +79,40 @@ QString Client::readFromConnection()
                     chatList[chatName] = QStringList();
                 }
             }
-
             emit chatsChanged();
         }
         else
         {
-            chatList[currentChat].append(message);
-            chatMessages = chatList.value(currentChat);
-            emit messagesChanged();
+            QStringList parts = message.split("|");
+            if (parts.size() == 2)
+            {
+                QString sender = parts[0];
+                QString content = parts[1];
+
+                QString name = (sender == clientName) ? "You" : sender;
+                content = QString("<b>%1: </b>\t%2").arg(name, content);
+                chatList[sender].append(content);
+
+                if (currentChat == sender)
+                {
+                    chatMessages = chatList.value(currentChat);
+                    emit messagesChanged();
+                }
+            }
+            else
+            {
+                chatList["General"].append(message);
+
+                if (currentChat == "General")
+                {
+                    chatMessages = chatList.value("General");
+                    emit messagesChanged();
+                }
+            }
+
+            // chatList[currentChat].append(message);
+            // chatMessages = chatList.value(currentChat);
+            // emit messagesChanged();
         }
         nextBlockSize = 0;
     }
@@ -121,8 +148,13 @@ void Client::sendToConnection(const QString& text)
     {
         QString content = (text.split("|"))[1];
         result = QString("MSG|%1|%2|%3").arg(clientName, currentChat, content);
-        qDebug() << "Private message struct: " << result;
+        //qDebug() << "Private message struct: " << result;
+
+        content = QString("<b>You:</b>\t%1").arg(content);
+        chatList[currentChat].append(content);
+        emit messagesChanged();
     }
+
     data.clear();
     QDataStream out(&data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_6_9);

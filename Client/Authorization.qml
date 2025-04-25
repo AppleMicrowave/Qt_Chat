@@ -28,7 +28,8 @@ Page {
             loginDialog.title = "Login succeed.";
             loginDialog.text = "Welcome, " + client.getClientName();
             loginDialog.open();
-            pageStack.push("Chat.qml")
+            winTitle = qsTr("Chat app" + ": " + client.getClientName());
+            pageStack.push("Chat.qml");
         } else if (result === "AUTH_FAIL") {
             loginDialog.title = "Login error.";
             loginDialog.text = "Invalid login/password / server is not avaliable.";

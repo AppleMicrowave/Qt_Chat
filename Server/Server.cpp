@@ -65,31 +65,39 @@ void Server::readFromConnection()
             qDebug() << "Client's message: " + message;
             if (parts.size() == 2) // Broadcast
             {
-                message = parts[1];
-                sendToConnection(message);
+                QString text = parts[1];
+                chatList["General"].append(text);
+                sendToConnection(text);
             }
             else if (parts.size() == 4) // Private
             {
-                message = parts[3];
+                QString sender = parts[1];
                 QString receiver = parts[2];
-                for (QTcpSocket* clientSocket : clients.keys()) {
-                    if (clients.value(clientSocket) == receiver) {
-                        sendToConnection(clientSocket, message);
-                        break;
+                QString text = parts[3];
+
+                text = sender + "|" + text;
+
+                foreach (currentClient, clients.keys())
+                {
+                    QString temp = clients.value(currentClient);
+                    if (temp == receiver || temp == sender)
+                    {
+                        qDebug() << "PRIVATE| Server response: " << text;
+                        sendToConnection(currentClient, text);
                     }
                 }
             }
         }
         else if (command == "LIST")
         {
-            for (QTcpSocket* clientSocket : clients.keys()) {
+            foreach (currentClient, clients.keys()) {
                 QStringList names = clients.values();
-                QString currentName = clients.value(clientSocket);
+                QString currentName = clients.value(currentClient);
                 names.removeAll(currentName);
 
                 QString response = "CLIENTS|General," + names.join(",");
                 qDebug() << response;
-                sendToConnection(clientSocket, response);
+                sendToConnection(currentClient, response);
             }
         }
         else if (command == "AUTH" && parts.size() == 3)

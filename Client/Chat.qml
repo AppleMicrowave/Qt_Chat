@@ -44,6 +44,8 @@ Page {
                     model: client !== null && client.chats !== undefined ? client.chats : []
                     clip: true
 
+                    property int selectedIndex: -1
+
                     delegate: Item {
                         width: chatList.width
                         height: 60
@@ -52,7 +54,7 @@ Page {
                             id: background
                             anchors.fill: parent
                             radius: 15
-                            color: "#85ffee"
+                            color: ListView.isCurrentItem || index === chatList.selectedIndex ? "SkyBlue" : "#85ffee"
                             border.color: "Black"
                             border.width: 1
 
@@ -69,14 +71,18 @@ Page {
                                 id: mouseArea
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                onPressed: {
-                                    background.color = "SkyBlue"
+
+                                onClicked: {
+                                    chatList.selectedIndex = index // обновляем выделение
+                                    chat.visible = true
+                                    input.visible = true
+                                    ftp.visible = true
+                                    btn.visible = true
                                     client.selectChat(modelData)
-                                    console.log(modelData)
                                 }
-                                onReleased: background.color = "#85ffee"
-                                onEntered: background.border.width = 2;
-                                onExited: background.border.width = 1;
+
+                                onEntered: background.border.width = 2
+                                onExited: background.border.width = 1
                             }
                         }
                     }
@@ -88,7 +94,7 @@ Page {
                 Rectangle { // Chat
 
                     id: chat
-
+                    visible: false
                     Layout.topMargin: 20
                     Layout.rightMargin: 20
                     Layout.fillWidth: true
@@ -96,8 +102,9 @@ Page {
 
                     TextArea {
                         id: content
+                        textFormat: Text.RichText
                         readOnly: true
-                        text: client !== null ? client.chatMessages.join("\n") : ""
+                        text: client !== null ? client.chatMessages.join("<br>") : ""
                     }
                 }
 
@@ -108,10 +115,11 @@ Page {
 
                     TextField {
                         id: input
+                        visible: false
                         Layout.fillWidth: true
                         Layout.preferredHeight: 60
-                        wrapMode: Wrap
-                        placeholderText: "Введите сообщение..."
+                        //wrapMode: Wrap
+                        placeholderText: "Put some text..."
 
                         Keys.onReturnPressed: {
                             send()
@@ -120,6 +128,7 @@ Page {
 
                     Button {
                         id: ftp
+                        visible: false
                         Layout.alignment: Qt.AlignCenter
                         Layout.preferredWidth: 50
                         Layout.preferredHeight: 50
@@ -128,6 +137,7 @@ Page {
 
                     Button {
                         id: btn
+                        visible: false
                         Layout.alignment: Qt.AlignCenter
                         Layout.preferredWidth: 50
                         Layout.preferredHeight: 50

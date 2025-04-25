@@ -11,7 +11,6 @@ Server::Server()
     if (this->listen(QHostAddress::LocalHost, 8080))
     {
         qDebug() << "start";
-        //qDebug() << this->serverAddress() << " " << this->serverPort();
     }
     else
     {
@@ -25,6 +24,7 @@ void Server::incomingConnection(qintptr socketDescriptor)
     socket->setSocketDescriptor(socketDescriptor);
     addToSockets(socket);
     qDebug() << "Client connected:" << socketDescriptor;
+
 }
 
 void Server::addToSockets(QTcpSocket *socket)
@@ -94,7 +94,8 @@ void Server::readFromConnection()
         }
         else if (command == "LIST")
         {
-            foreach (currentClient, clients.keys()) {
+            foreach (currentClient, clients.keys())
+            {
                 QStringList names = clients.values();
                 QString currentName = clients.value(currentClient);
                 names.removeAll(currentName);
@@ -129,7 +130,8 @@ void Server::readFromConnection()
             sendToConnection(socket, response);
         }
 
-        else {
+        else
+        {
             sendToConnection("ERROR|Unknown command or invalid arguments");
         }
     }
@@ -193,23 +195,14 @@ void Server::initializeDB()
             "password TEXT)"
             )) {
     }
-
-    if (!query.exec(
-            "CREATE TABLE IF NOT EXISTS messages ("
-            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-            "sender TEXT,"
-            "receiver TEXT,"
-            "message TEXT,"
-            "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"
-            )) {
-    }
     db.close();
 }
 
 bool Server::authentication(const QString &login, const QString &password, bool register_flag)
 {
     QSqlDatabase db = QSqlDatabase::database();
-    if (db.open() == false) {
+    if (db.open() == false)
+    {
         qDebug() << "DB connect is failed";
         return false;
     }
@@ -221,7 +214,8 @@ bool Server::authentication(const QString &login, const QString &password, bool 
         query.bindValue(":login", login);
         query.bindValue(":password", password);
 
-        if (query.exec() && query.next()) {
+        if (query.exec() && query.next())
+        {
             return true;
         }
         return false;
@@ -232,7 +226,8 @@ bool Server::authentication(const QString &login, const QString &password, bool 
         query.bindValue(":login", login);
         query.bindValue(":password", password);
 
-        if (!query.exec()) {
+        if (!query.exec())
+        {
             qDebug() << "Registration error:" << query.lastError().text();
             return false;
         }

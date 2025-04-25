@@ -10,7 +10,6 @@ Page {
     function send() {
         if (input.text !== "") {
             client.on_button_send_clicked(input.text)
-            //console.log("Send message: " + input.text);
             input.clear();
         }
         input.clear();
@@ -73,10 +72,9 @@ Page {
                                 hoverEnabled: true
 
                                 onClicked: {
-                                    chatList.selectedIndex = index // обновляем выделение
+                                    chatList.selectedIndex = index
                                     chat.visible = true
                                     input.visible = true
-                                    ftp.visible = true
                                     btn.visible = true
                                     client.selectChat(modelData)
                                 }
@@ -103,6 +101,7 @@ Page {
                     TextArea {
                         id: content
                         textFormat: Text.RichText
+                        wrapMode: Text.Wrap
                         readOnly: true
                         text: client !== null ? client.chatMessages.join("<br>") : ""
                     }
@@ -113,13 +112,18 @@ Page {
                     Layout.bottomMargin: 20
                     spacing: 10
 
-                    TextField {
+                    TextArea {
                         id: input
                         visible: false
+
                         Layout.fillWidth: true
                         Layout.preferredHeight: 60
-                        //wrapMode: Wrap
+                        wrapMode: Text.Wrap
+
                         placeholderText: "Put some text..."
+                        font.pixelSize: 18
+                        padding: 10
+
 
                         Keys.onReturnPressed: {
                             send()
@@ -127,21 +131,15 @@ Page {
                     }
 
                     Button {
-                        id: ftp
-                        visible: false
-                        Layout.alignment: Qt.AlignCenter
-                        Layout.preferredWidth: 50
-                        Layout.preferredHeight: 50
-                        text: "Load"
-                    }
-
-                    Button {
                         id: btn
                         visible: false
+
                         Layout.alignment: Qt.AlignCenter
                         Layout.preferredWidth: 50
                         Layout.preferredHeight: 50
-                        text: "Send"
+
+                        text: "->"
+                        font.pixelSize: 24
 
                         onClicked: {
                             send()

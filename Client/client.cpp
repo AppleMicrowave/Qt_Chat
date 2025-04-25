@@ -41,7 +41,6 @@ void Client::selectChat(const QString& chatName)
     if (chatList.contains(chatName))
     {
         currentChat = chatName;
-        qDebug() << "Selected chat: " << currentChat;
         emit messagesChanged();
     }
 }
@@ -93,6 +92,8 @@ QString Client::readFromConnection()
                 content = QString("<b>%1: </b>\t%2").arg(name, content);
                 chatList["General"].append(content);
 
+                if (currentChat != "General") emit messageReceived("General");
+
                 if (currentChat == "General")
                 {
                     chatMessages = chatList.value("General");
@@ -103,6 +104,8 @@ QString Client::readFromConnection()
             {
                 content = QString("<b>%1: </b>\t%2").arg(name, content);
                 chatList[sender].append(content);
+
+                if (currentChat != sender) emit messageReceived(sender);
 
                 if (currentChat == sender)
                 {
@@ -139,7 +142,7 @@ void Client::clientDisconnect()
 }
 
 void Client::sendToConnection(const QString& text)
-{
+{    
     QString result = text;
     if (currentChat != "General")
     {

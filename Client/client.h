@@ -35,10 +35,9 @@ private:
     bool isConnected = false;
 
     void sendToConnection(const QString& text);
-    //void addToSockets(QTcpSocket* socket);
 
 signals:
-    void messageReceived(const QString& message);
+    void messageReceived(const QString& chat);
     void messagesChanged();
     void chatsChanged();
     void authResult(const QString& result);

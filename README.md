@@ -1,2 +1,2 @@
 # Qt_Chat
-Network programming course work
+Qt Network + QML practice work
